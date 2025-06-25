@@ -6,8 +6,9 @@ import Hero from "./hero";
 
 
 const StoryGrid = () => {
+  const BASE_URL = process.env.REACT_APP_API_BASE_URL;
   const handleBuy = async (bundle) => {
-    const res = await fetch("http://localhost:4242/api/create-checkout-session", {
+    const res = await fetch(`${BASE_URL}/api/create-checkout-session`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(bundle),
