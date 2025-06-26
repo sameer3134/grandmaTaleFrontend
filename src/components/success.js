@@ -39,30 +39,41 @@ const Success = () => {
         // ✅ Save to Firebase
         await addDoc(collection(db, "orders"), orderData);
         const snapshot = await getDocs(collection(db, "orders"));
-        if (snapshot.size % 13 === 0) {
+        if (snapshot.size % 100 === 0) {
           const docs = snapshot.docs;
-          const winnerDoc = docs[Math.floor(Math.random() * docs.length)];
+
+          // Determine start and end indexes for the current block of 100
+          const total = snapshot.size;
+          const start = total - 100;
+          const end = total;
+
+          // Slice the last 100 docs
+          const block = docs.slice(start, end);
+
+          // Pick a random winner from the block
+          const winnerDoc = block[Math.floor(Math.random() * block.length)];
           const winnerData = winnerDoc.data();
-          // Save to Firestore
-        await addDoc(collection(db, "draws"), {
-  ticketId: winnerData.ticketId,
-  email: winnerData.email,
-  timestamp: new Date(),
-});
+
+          // Save winner to "draws" collection
+          await addDoc(collection(db, "draws"), {
+            ticketId: winnerData.ticketId,
+            email: winnerData.email,
+            timestamp: new Date(),
+          });
 
           await fetch(`${BASE_URL}/api/log-order`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: sessionData.customer_email,
-            product: sessionData.metadata?.title || "Folktale Bundle",
-            amount: sessionData.amount_total,
-            ticketId: ticket,
-          }),
-        });
-      }
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              email: sessionData.customer_email,
+              product: sessionData.metadata?.title || "Folktale Bundle",
+              amount: sessionData.amount_total,
+              ticketId: ticket,
+            }),
+          });
+        }
 
-        
+
 
       } catch (err) {
         console.error("Error handling success:", err);
